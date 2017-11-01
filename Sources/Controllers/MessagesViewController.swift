@@ -46,13 +46,6 @@ open class MessagesViewController: UIViewController {
     /// The default value of this property is `false`.
     open var scrollsToBottomOnKeybordBeginsEditing: Bool = false
 
-	open var additionalTopContentInset: CGFloat = 0 {
-		didSet {
-			let inset = topLayoutGuide.length + additionalTopContentInset
-			messagesCollectionView.contentInset.top = inset
-		}
-	}
-
     private var isFirstLayout: Bool = true
 
 	lazy open var audioPlayer = {
@@ -70,9 +63,6 @@ open class MessagesViewController: UIViewController {
     open override var shouldAutorotate: Bool {
         return false
     }
-    
-    /// A Boolean value used to determine if `viewDidLayoutSubviews()` has been called.
-    private var isFirstLayout: Bool = true
 
     // MARK: - View Life Cycle
 

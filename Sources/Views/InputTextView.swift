@@ -60,9 +60,7 @@ open class InputTextView: UITextView {
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
     }()
-
-    private var placeholderLabelConstraintSet: NSLayoutConstraintSet?
-
+    
     /// The placeholder text that appears when there is no text. The default value is "New Message"
     open var placeholder: String? = "New Message" {
         didSet {

@@ -68,6 +68,8 @@ open class MessagesCollectionViewFlowLayout: UICollectionViewFlowLayout {
         }
     }
 
+    fileprivate var avatarMessagePadding: CGFloat = 4
+
     /// Determines the maximum number of `MessageCollectionViewCell` attributes to cache.
     ///
     /// The default value of this property is 500.
@@ -491,6 +493,11 @@ private extension MessagesCollectionViewFlowLayout {
             }
             let width = layoutDelegate.widthForLocation(message: message, at: indexPath, with: maxWidth, in: messagesCollectionView)
             let height = layoutDelegate.heightForLocation(message: message, at: indexPath, with: maxWidth, in: messagesCollectionView)
+            messageContainerSize = CGSize(width: width, height: height)
+        case .audio(_):
+            guard let layoutDelegate = messagesCollectionView.messagesLayoutDelegate as? AudioMessageLayoutDelegate else { return .zero }
+            let width = layoutDelegate.widthForAudio(message: message, at: indexPath, with: maxWidth, in: messagesCollectionView)
+            let height = layoutDelegate.heightForAudio(message: message, at: indexPath, with: maxWidth, in: messagesCollectionView)
             messageContainerSize = CGSize(width: width, height: height)
         }
         

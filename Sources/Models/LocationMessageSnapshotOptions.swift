@@ -27,14 +27,11 @@ import MapKit
 /// An object grouping the settings used by the `MKMapSnapshotter` through the `LocationMessageDisplayDelegate`.
 public struct LocationMessageSnapshotOptions {
 
-<<<<<<< HEAD
 	public init() {}
 	
-=======
     /// A Boolean value indicating whether the snapshot image should display buildings.
     ///
     /// The default value of this property is `false`.
->>>>>>> 5365fcf79c97ab6960a5e9ff6b2ff0ec349350be
     var showsBuildings = false
 
     /// A Boolean value indicating whether the snapshot image should display points of interest.
