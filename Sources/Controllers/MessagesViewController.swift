@@ -25,15 +25,25 @@
 import UIKit
 
 open class MessagesViewController: UIViewController {
+    
+    // MARK: - Properties [Public]
 
-    // MARK: - Properties
-
+    /// The `MessagesCollectionView` managed by the messages view controller object.
     open var messagesCollectionView = MessagesCollectionView()
 
+    /// The `MessageInputBar` used as the `inputAccessoryView` in the view controller.
     open var messageInputBar = MessageInputBar()
     
+    /// A Boolean value that determines whether the `MessagesCollectionView` scrolls to the
+    /// bottom on the view's first layout.
+    ///
+    /// The default value of this property is `false`.
     open var scrollsToBottomOnFirstLayout: Bool = false
 
+    /// A Boolean value that determines whether the `MessagesCollectionView` scrolls to the
+    /// bottom whenever the `InputTextView` begins editing.
+    ///
+    /// The default value of this property is `false`.
     open var scrollsToBottomOnKeybordBeginsEditing: Bool = false
 
 	open var additionalTopContentInset: CGFloat = 0 {
@@ -60,6 +70,9 @@ open class MessagesViewController: UIViewController {
     open override var shouldAutorotate: Bool {
         return false
     }
+    
+    /// A Boolean value used to determine if `viewDidLayoutSubviews()` has been called.
+    private var isFirstLayout: Bool = true
 
     // MARK: - View Life Cycle
 
@@ -94,7 +107,7 @@ open class MessagesViewController: UIViewController {
 			}
             messagesCollectionView.contentInset.bottom = messageInputBar.frame.height
             messagesCollectionView.scrollIndicatorInsets.bottom = messageInputBar.frame.height
-            
+
             //Scroll to bottom at first load
             if scrollsToBottomOnFirstLayout {
                 messagesCollectionView.scrollToBottom(animated: false)
@@ -112,13 +125,15 @@ open class MessagesViewController: UIViewController {
         removeKeyboardObservers()
     }
 
-    // MARK: - Methods
+    // MARK: - Methods [Private]
 
+    /// Sets the delegate and dataSource of the messagesCollectionView property.
     private func setupDelegates() {
         messagesCollectionView.delegate = self
         messagesCollectionView.dataSource = self
     }
 
+    /// Registers all cells and supplementary views of the messagesCollectionView property.
     private func registerReusableViews() {
 
         messagesCollectionView.register(TextMessageCell.self)
@@ -132,19 +147,26 @@ open class MessagesViewController: UIViewController {
 
     }
 
+    /// Adds the messagesCollectionView to the controllers root view.
     private func setupSubviews() {
         view.addSubview(messagesCollectionView)
     }
 
+    /// Sets the constraints of the `MessagesCollectionView`.
     private func setupConstraints() {
         messagesCollectionView.translatesAutoresizingMaskIntoConstraints = false
-
+        
         let top = messagesCollectionView.topAnchor.constraint(equalTo: view.topAnchor, constant: topLayoutGuide.length)
-        let leading = messagesCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
-        let trailing = messagesCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         let bottom = messagesCollectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-
-        NSLayoutConstraint.activate([top, bottom, trailing, leading])
+        if #available(iOS 11.0, *) {
+            let leading = messagesCollectionView.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor)
+            let trailing = messagesCollectionView.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor)
+            NSLayoutConstraint.activate([top, bottom, trailing, leading])
+        } else {
+            let leading = messagesCollectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor)
+            let trailing = messagesCollectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            NSLayoutConstraint.activate([top, bottom, trailing, leading])
+        }
     }
 }
 
@@ -263,14 +285,14 @@ extension MessagesViewController: UICollectionViewDataSource {
 
 // MARK: - Keyboard Handling
 
-extension MessagesViewController {
+fileprivate extension MessagesViewController {
 
-    fileprivate func addKeyboardObservers() {
+    func addKeyboardObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(handleKeyboardDidChangeState), name: .UIKeyboardWillChangeFrame, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(handleTextViewDidBeginEditing), name: .UITextViewTextDidBeginEditing, object: messageInputBar.inputTextView)
     }
 
-    fileprivate func removeKeyboardObservers() {
+    func removeKeyboardObservers() {
         NotificationCenter.default.removeObserver(self, name: .UIKeyboardWillChangeFrame, object: nil)
         NotificationCenter.default.removeObserver(self, name: .UITextViewTextDidBeginEditing, object: messageInputBar.inputTextView)
     }
@@ -283,25 +305,42 @@ extension MessagesViewController {
         }
     }
 
-    @objc func handleKeyboardDidChangeState(_ notification: Notification) {
+    @objc
+    func handleKeyboardDidChangeState(_ notification: Notification) {
 
         guard let keyboardEndFrame = notification.userInfo?[UIKeyboardFrameEndUserInfoKey] as? CGRect else { return }
 
         if (keyboardEndFrame.origin.y + keyboardEndFrame.size.height) > UIScreen.main.bounds.height {
             // Hardware keyboard is found
-            let bottomInset = view.frame.size.height - keyboardEndFrame.origin.y
+            let bottomInset = view.frame.size.height - keyboardEndFrame.origin.y - iPhoneXBottomInset
             messagesCollectionView.contentInset.bottom = bottomInset
             messagesCollectionView.scrollIndicatorInsets.bottom = bottomInset
 
         } else {
             //Software keyboard is found
-            let bottomInset = keyboardEndFrame.height > messageInputBar.frame.height ? keyboardEndFrame.height : messageInputBar.frame.height
+            let bottomInset = keyboardEndFrame.height > keyboardOffsetFrame.height ? (keyboardEndFrame.height - iPhoneXBottomInset) : keyboardOffsetFrame.height
             messagesCollectionView.contentInset.bottom = bottomInset
             messagesCollectionView.scrollIndicatorInsets.bottom = bottomInset
         }
         
     }
     
+    fileprivate var keyboardOffsetFrame: CGRect {
+        guard let inputFrame = inputAccessoryView?.frame else { return .zero }
+        return CGRect(origin: inputFrame.origin, size: CGSize(width: inputFrame.width, height: inputFrame.height - iPhoneXBottomInset))
+    }
+    
+    /// On the iPhone X the inputAccessoryView is anchored to the layoutMarginesGuide.bottom anchor so the frame of the inputAccessoryView
+    /// is larger than the required offset for the MessagesCollectionView
+    ///
+    /// - Returns: The safeAreaInsets.bottom if its an iPhoneX, else 0
+    fileprivate var iPhoneXBottomInset: CGFloat {
+        if #available(iOS 11.0, *) {
+            guard UIScreen.main.nativeBounds.height == 2436 else { return 0 }
+            return view.safeAreaInsets.bottom
+        }
+        return 0
+    }
 }
 
 extension MessagesViewController {
