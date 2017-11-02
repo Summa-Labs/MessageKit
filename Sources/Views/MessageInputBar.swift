@@ -130,6 +130,7 @@ open class MessageInputBar: UIView {
 
     open var sendAudioButton: InputBarButtonItem = {
         return InputBarButtonItem().configure {
+			$0.setSize(CGSize(width: 26, height: 26), animated: false)
             $0.image = #imageLiteral(resourceName: "voiceRecording")
             }.onTouchDownInside {
                 $0.messageInputBar?.didSelectAudioButton()
