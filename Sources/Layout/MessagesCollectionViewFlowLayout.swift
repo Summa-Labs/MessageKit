@@ -121,6 +121,9 @@ open class MessagesCollectionViewFlowLayout: UICollectionViewFlowLayout {
         guard let collectionView = collectionView else { return 0 }
         return collectionView.frame.width - sectionInset.left - sectionInset.right
     }
+    
+    /// The avatar position to looks like in Zeplin
+    fileprivate var summaAvatarPadding: CGFloat = 15.0
 
     // MARK: - Initializers [Public]
 
@@ -787,7 +790,8 @@ fileprivate extension MessagesCollectionViewFlowLayout {
         
         guard attributes.cellBottomLabelSize != .zero else { return .zero }
         
-        var origin = CGPoint(x: 0, y: contentFrame.height - attributes.cellBottomLabelSize.height)
+        let summaVerticalPositionBottomLabel = attributes.messageContainerSize.height + attributes.cellBottomLabelSize.height
+        var origin = CGPoint(x: 0, y: summaVerticalPositionBottomLabel)
         
         switch (attributes.cellBottomLabelAlignment, attributes.avatarHorizontal) {
         case (.cellLeading, _):
@@ -797,11 +801,11 @@ fileprivate extension MessagesCollectionViewFlowLayout {
         case (.cellTrailing, _):
             origin.x = contentFrame.width - attributes.cellBottomLabelSize.width
         case (.messageLeading, .cellLeading):
-            origin.x = attributes.avatarSize.width + attributes.messageContainerPadding.left
+            origin.x = attributes.avatarSize.width + attributes.messageContainerPadding.left + summaAvatarPadding
         case (.messageLeading, .cellTrailing):
             origin.x = contentFrame.width - attributes.avatarSize.width - attributes.messageContainerPadding.right - attributes.cellBottomLabelSize.width
         case (.messageTrailing, .cellTrailing):
-            origin.x = contentFrame.width - attributes.avatarSize.width - attributes.messageContainerPadding.right - attributes.cellBottomLabelSize.width
+            origin.x = contentFrame.width - attributes.avatarSize.width - attributes.messageContainerPadding.right - attributes.cellBottomLabelSize.width - summaAvatarPadding
         case (.messageTrailing, .cellLeading):
             origin.x = attributes.avatarSize.width + attributes.messageContainerPadding.left + attributes.messageContainerSize.width - attributes.cellBottomLabelSize.width
         }
@@ -830,11 +834,13 @@ fileprivate extension MessagesCollectionViewFlowLayout {
         case (.cellTrailing, _):
             origin.x = contentFrame.width - attributes.cellTopLabelSize.width
         case (.messageLeading, .cellLeading):
-            origin.x = attributes.avatarSize.width + attributes.messageContainerPadding.left
+            // because we position avatar over the cell, we need to move username above cell for the same dimension
+            origin.x = attributes.avatarSize.width + attributes.messageContainerPadding.left + summaAvatarPadding
         case (.messageLeading, .cellTrailing):
             origin.x = contentFrame.width - attributes.avatarSize.width - attributes.messageContainerPadding.right - attributes.messageContainerSize.width
         case (.messageTrailing, .cellTrailing):
-            origin.x = contentFrame.width - attributes.avatarSize.width - attributes.messageContainerPadding.right - attributes.cellTopLabelSize.width
+            // because we position avatar over the cell, we need to move username above cell for the same dimension
+            origin.x = contentFrame.width - attributes.avatarSize.width - attributes.messageContainerPadding.right - attributes.cellTopLabelSize.width - summaAvatarPadding
         case (.messageTrailing, .cellLeading):
             origin.x = contentFrame.width - attributes.messageContainerPadding.right - attributes.cellTopLabelSize.width
         }
