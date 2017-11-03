@@ -732,9 +732,9 @@ fileprivate extension MessagesCollectionViewFlowLayout {
         
         switch attributes.avatarHorizontal {
         case .cellLeading:
-            origin.x = 0
+            origin.x = summaAvatarPadding
         case .cellTrailing:
-            origin.x = contentFrame.width - attributes.avatarSize.width
+            origin.x = contentFrame.width - attributes.avatarSize.width - summaAvatarPadding
         }
         
         switch attributes.avatarVertical {
