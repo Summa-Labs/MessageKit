@@ -294,7 +294,7 @@ fileprivate extension MessagesViewController {
 	}
 	
 	@objc func handleTextViewDidBeginEditing(_ notification: Notification) {
-		guard messagesCollectionView.contentOffset.y - 34.0 == messagesCollectionView.contentSize.height - messagesCollectionView.bounds.size.height || messagesCollectionView.contentOffset.y - 42.0 == messagesCollectionView.contentSize.height - messagesCollectionView.bounds.size.height else { return }
+        guard messagesCollectionView.contentOffset.y + messagesCollectionView.bounds.size.height >= messagesCollectionView.contentSize.height || messagesCollectionView.contentOffset.y - 42.0 == messagesCollectionView.contentSize.height - messagesCollectionView.bounds.size.height else { return }
 		
 		if scrollsToBottomOnKeybordBeginsEditing {
 			messagesCollectionView.scrollToBottom(animated: true)
